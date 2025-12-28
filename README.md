@@ -2,6 +2,8 @@
 
 A framework for developing and testing alpha trading strategies.
 
+> **Note**: This project has been refactored for clarity and readability, with improved code structure and documentation.
+
 ## Description
 
 AlphaLab provides a simple and extensible framework for creating, testing, and evaluating alpha trading strategies. It offers:
