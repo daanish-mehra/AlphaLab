@@ -53,3 +53,55 @@ def information_coefficient(
     
     return float(ic_value)
 
+
+def sharpe_ratio(
+    returns: Union[pd.Series, np.ndarray],
+    risk_free_rate: float = 0.0,
+    periods_per_year: int = 252
+) -> float:
+    """Calculate Sharpe ratio - basically how much return you're getting per unit of risk.
+    
+    Sharpe ratio is a standard way to measure risk-adjusted returns. It tells you if
+    your strategy is actually good or if you're just taking on more risk. Higher is
+    better - typically you want Sharpe > 1.0 to consider a strategy decent. It's
+    just (mean return - risk free rate) / standard deviation, then annualized.
+    
+    Args:
+        returns: Your strategy returns - can be Series or numpy array
+        risk_free_rate: Risk-free rate (default 0.0, but you can use treasury rate if you want)
+        periods_per_year: How many periods make up a year (252 for daily, 12 for monthly, etc.)
+    
+    Returns:
+        Annualized Sharpe ratio. Returns 0.0 if there's no volatility (can't divide by zero).
+    
+    Example:
+        >>> import pandas as pd
+        >>> returns = pd.Series([0.01, 0.02, -0.01, 0.015, 0.01])
+        >>> sharpe = sharpe_ratio(returns, risk_free_rate = 0.02, periods_per_year = 252)
+        >>> print(f"Sharpe: {sharpe:.3f}")
+    """
+    # Convert numpy arrays to Series if needed
+    if isinstance(returns, np.ndarray):
+        returns = pd.Series(returns)
+    
+    # Can't calculate anything with no data
+    if len(returns) == 0:
+        return 0.0
+    
+    # Get the mean and standard deviation of returns
+    mean_return = returns.mean()
+    std_return = returns.std()
+    
+    # If there's no volatility, Sharpe is undefined - just return 0
+    if std_return == 0 or pd.isna(std_return):
+        return 0.0
+    
+    # Calculate excess return (above risk-free rate)
+    # Need to adjust risk-free rate to match the period frequency
+    excess_return = mean_return - (risk_free_rate / periods_per_year)
+    
+    # Annualize the Sharpe ratio by multiplying by sqrt of periods per year
+    sharpe = excess_return / std_return * np.sqrt(periods_per_year)
+    
+    return float(sharpe)
+
